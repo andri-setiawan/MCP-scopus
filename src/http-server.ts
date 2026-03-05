@@ -697,8 +697,8 @@ function createServer(): Server {
   return server;
 }
 
-// Store active transports
-const transports: Map<string, SSEServerTransport> = new Map();
+// Store active transports by session ID
+const transports: Map<string, { transport: SSEServerTransport; server: Server }> = new Map();
 
 // Express app setup
 const app = express();
@@ -710,40 +710,75 @@ app.get("/health", (_req: Request, res: Response) => {
   res.json({ status: "ok", service: "mcp-scopus" });
 });
 
-// SSE endpoint for MCP
-app.get("/sse", async (_req: Request, res: Response) => {
-  console.log("New SSE connection established");
+// SSE endpoint for MCP clients to connect
+app.get("/sse", async (req: Request, res: Response) => {
+  console.log("New SSE connection request");
+
+  // Set SSE headers
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+
+  // Create new server and transport for this connection
   const server = createServer();
   const transport = new SSEServerTransport("/message", res);
 
-  // Store transport by session ID
-  const sessionId = Math.random().toString(36).substring(7);
-  transports.set(sessionId, transport);
+  // Generate session ID
+  const sessionId = Math.random().toString(36).substring(2, 15);
+  transports.set(sessionId, { transport, server });
 
-  // Clean up on close
+  console.log(`Session ${sessionId} created`);
+
+  // Handle connection close
   res.on("close", () => {
-    console.log("SSE connection closed");
+    console.log(`Session ${sessionId} closed`);
     transports.delete(sessionId);
   });
 
-  await server.connect(transport);
+  // Connect the server to the transport
+  try {
+    await server.connect(transport);
+    console.log(`Session ${sessionId} connected`);
+  } catch (error) {
+    console.error(`Error connecting session ${sessionId}:`, error);
+    transports.delete(sessionId);
+    res.end();
+  }
 });
 
-// Message endpoint for MCP
+// Message endpoint for receiving client messages
 app.post("/message", async (req: Request, res: Response) => {
-  console.log("Received message:", req.body);
+  const sessionId = req.query.sessionId as string;
 
-  // Find the active transport and handle the message
-  for (const [sessionId, transport] of transports) {
+  console.log(`Message received for session ${sessionId || "unknown"}`);
+
+  // Find the transport for this session
+  if (sessionId && transports.has(sessionId)) {
+    const { transport } = transports.get(sessionId)!;
     try {
       await transport.handlePostMessage(req, res, req.body);
       return;
     } catch (error) {
       console.error(`Error handling message for session ${sessionId}:`, error);
+      res.status(500).json({ error: "Internal server error" });
+      return;
     }
   }
 
-  res.status(200).send("OK");
+  // If no sessionId, try all transports (for backwards compatibility)
+  for (const [id, { transport }] of transports) {
+    try {
+      await transport.handlePostMessage(req, res, req.body);
+      console.log(`Message handled by session ${id}`);
+      return;
+    } catch (error) {
+      // Try next transport
+      continue;
+    }
+  }
+
+  res.status(404).json({ error: "No active session found" });
 });
 
 // Start server
