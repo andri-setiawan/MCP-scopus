@@ -8,7 +8,7 @@
 
 ## Why This Matters 🎯
 
-When AI assistants write academic papers or research content, they often **hallucinate citations** - inventing papers that don't exist, misattributing authors, or fabricating DOIs. This MCP server solves that problem by giving AI direct access to **real academic data** from Scopus, the world's largest abstract and citation database. And many of us have been victims of this situation T_T
+When AI assistants write academic papers or research content, they often **hallucinate citations** - inventing papers that don't exist, misattributing authors, or fabricating DOIs. And many of us have been victims of this situation T_T This MCP server solves that problem by giving AI direct access to **real academic data** from Scopus, the world's largest abstract and citation database.
 
 ### The Problem
 - AI hallucinates non-existent papers ❌
