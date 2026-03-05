@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+*.log
+.DS_Store
+*.js
+!src/**/*.js
+test-*.js
+*-test.js
+paper-*.js
+search-*.js
+get-*.js

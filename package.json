@@ -1,0 +1,47 @@
+{
+  "name": "mcp-scopus",
+  "version": "1.0.0",
+  "description": "MCP server for searching academic papers on Scopus",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "mcp-scopus": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "start:http": "node dist/http-server.js",
+    "dev": "ts-node src/index.ts",
+    "dev:http": "ts-node src/http-server.ts",
+    "docker:build": "docker build -t mcp-scopus .",
+    "docker:run": "docker run -p 5566:5566 --env-file .env mcp-scopus"
+  },
+  "keywords": [
+    "mcp",
+    "scopus",
+    "academic",
+    "papers",
+    "research"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "axios": "^1.6.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.0",
+    "eventsource": "^4.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

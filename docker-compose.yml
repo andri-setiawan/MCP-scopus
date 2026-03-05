@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  mcp-scopus:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mcp-scopus:latest
+    container_name: mcp-scopus
+    ports:
+      - "5566:5566"
+    environment:
+      - SCOPUS_API_KEY=${SCOPUS_API_KEY}
+      - PORT=5566
+      - NODE_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5566/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
