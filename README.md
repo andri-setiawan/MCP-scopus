@@ -4,11 +4,11 @@
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-brightgreen.svg)](https://nodejs.org/)
-[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
+[![Docker](https://img.shields.io/badge/Docker-Optional-blue.svg)](https://www.docker.com/)
 
 ## Why This Matters 🎯
 
-When AI assistants write academic papers or research content, they often **hallucinate citations** - inventing papers that don't exist, misattributing authors, or fabricating DOIs. And many of us have been victims of this situation T_T This MCP server solves that problem by giving AI direct access to **real academic data** from Scopus, the world's largest abstract and citation database.
+When AI assistants write academic papers or research content, they often **hallucinate citations** - inventing papers that don't exist, misattributing authors, or fabricating DOIs. This MCP server solves that problem by giving AI direct access to **real academic data** from Scopus, the world's largest abstract and citation database.
 
 ### The Problem
 - AI hallucinates non-existent papers ❌
@@ -42,17 +42,19 @@ When AI assistants write academic papers or research content, they often **hallu
 ### Institution Search
 - **search_by_affiliation** - Find papers by university/organization
 
-## Installation
+---
+
+## 🚀 Installation
 
 ### Prerequisites
-- Node.js 18 or higher
+- **Node.js 18+** (required)
 - A [Scopus API Key](https://dev.elsevier.com/) (free for academic use)
 
-### Quick Start
+### Step 1: Clone & Build
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/MCP-scopus.git
+git clone https://github.com/andri-setiawan/MCP-scopus.git
 cd MCP-scopus
 
 # Install dependencies
@@ -60,15 +62,103 @@ npm install
 
 # Build the project
 npm run build
-
-# Set your API key
-export SCOPUS_API_KEY=your_api_key_here
-
-# Run the server
-npm start
 ```
 
-### Docker Installation (Recommended)
+### Step 2: Get Scopus API Key
+
+1. Visit [Elsevier Developer Portal](https://dev.elsevier.com/)
+2. Create a free account
+3. Apply for API access
+4. Select "Scopus Search API"
+5. You'll receive an API key via email
+
+**Note:** Free API keys have rate limits. For production use, consider a paid subscription.
+
+---
+
+## ⚙️ Configuration (Choose One)
+
+### Option A: Direct Node.js (Recommended ✅)
+
+**Most stable and reliable method.** Uses stdio transport directly without network overhead.
+
+#### Claude Desktop Configuration
+
+Add to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "scopus": {
+      "command": "node",
+      "args": [
+        "/path/to/MCP-scopus/dist/index.js"
+      ],
+      "env": {
+        "SCOPUS_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+**Config file locations:**
+| OS | Path |
+|----|------|
+| Windows | `%APPDATA%\Claude\claude_desktop_config.json` |
+| macOS | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| Linux | `~/.config/Claude/claude_desktop_config.json` |
+
+#### Example: Windows Configuration
+```json
+{
+  "mcpServers": {
+    "scopus": {
+      "command": "node",
+      "args": [
+        "D:\\Documents\\MCP-scopus\\dist\\index.js"
+      ],
+      "env": {
+        "SCOPUS_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+#### Example: macOS/Linux Configuration
+```json
+{
+  "mcpServers": {
+    "scopus": {
+      "command": "node",
+      "args": [
+        "/home/username/MCP-scopus/dist/index.js"
+      ],
+      "env": {
+        "SCOPUS_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+#### Why This Method is Recommended
+
+| Aspect | Direct Node.js | HTTP/SSE (Docker) |
+|--------|----------------|-------------------|
+| **Stability** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
+| **Latency** | Lower | Higher |
+| **Connection** | Direct stdio | Network-based |
+| **Timeouts** | No issues | Possible |
+| **Docker Required** | No | Yes |
+| **Setup Complexity** | Simple | More complex |
+
+---
+
+### Option B: Docker + HTTP/SSE (Alternative)
+
+If you prefer containerization or need remote access:
 
 ```bash
 # Build the image
@@ -83,11 +173,7 @@ docker run -d \
   mcp-scopus
 ```
 
-## Configuration
-
-### Claude Desktop
-
-Add to your `claude_desktop_config.json`:
+#### Claude Desktop Configuration (HTTP)
 
 ```json
 {
@@ -101,21 +187,19 @@ Add to your `claude_desktop_config.json`:
 }
 ```
 
-Config file locations:
-- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
-- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
-- **Linux:** `~/.config/Claude/claude_desktop_config.json`
+#### Docker Management
+```bash
+docker logs mcp-scopus      # View logs
+docker restart mcp-scopus   # Restart container
+docker stop mcp-scopus      # Stop container
+docker start mcp-scopus     # Start container
+```
 
-### Environment Variables
+---
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `SCOPUS_API_KEY` | Yes | Your Scopus API key |
-| `PORT` | No | Server port (default: 5566) |
+## 📝 Usage Examples
 
-## Usage Examples
-
-Once configured, you can ask Claude to:
+Once configured, restart Claude Desktop and try:
 
 ```
 "Search for recent papers about transformer architectures in NLP"
@@ -127,7 +211,7 @@ Once configured, you can ask Claude to:
 
 ### Search Syntax
 
-The search tool supports Scopus advanced query syntax:
+The supports Scopus advanced query syntax:
 
 ```
 machine learning AND PUBYEAR > 2023
@@ -136,7 +220,9 @@ ABS(neural networks) AND KEY(transformer)
 SRCTITLE(Nature) AND PUBYEAR = 2024
 ```
 
-## Available Tools
+---
+
+## 🛠️ Available Tools
 
 | Tool | Description |
 |------|-------------|
@@ -151,10 +237,11 @@ SRCTITLE(Nature) AND PUBYEAR = 2024
 | `get_references` | Get paper's references |
 | `search_by_affiliation` | Search by institution |
 
-## API Reference
+---
+
+## 📖 API Reference
 
 ### search_papers
-
 ```typescript
 {
   query: string,           // Required: Search query
@@ -166,7 +253,6 @@ SRCTITLE(Nature) AND PUBYEAR = 2024
 ```
 
 ### get_paper_by_id
-
 ```typescript
 {
   scopusId: string         // Required: Scopus ID or EID
@@ -174,7 +260,6 @@ SRCTITLE(Nature) AND PUBYEAR = 2024
 ```
 
 ### get_citations
-
 ```typescript
 {
   scopusId: string,        // Required: Scopus ID
@@ -183,33 +268,9 @@ SRCTITLE(Nature) AND PUBYEAR = 2024
 }
 ```
 
-## Getting a Scopus API Key
+---
 
-1. Visit [Elsevier Developer Portal](https://dev.elsevier.com/)
-2. Create a free account
-3. Apply for API access
-4. Select "Scopus Search API"
-5. You'll receive an API key via email
-
-**Note:** Free API keys have rate limits. For production use, consider a paid subscription.
-
-## Docker Management
-
-```bash
-# View logs
-docker logs mcp-scopus
-
-# Restart container
-docker restart mcp-scopus
-
-# Stop container
-docker stop mcp-scopus
-
-# Start container
-docker start mcp-scopus
-```
-
-## Development
+## 🔧 Development
 
 ```bash
 # Install dependencies
@@ -218,20 +279,22 @@ npm install
 # Build TypeScript
 npm run build
 
-# Run in development mode
+# Run in development mode (stdio)
 npm run dev
 
 # Run HTTP server
 npm run start:http
 ```
 
-## Project Structure
+---
+
+## 📁 Project Structure
 
 ```
 MCP-scopus/
 ├── src/
-│   ├── index.ts          # Stdio MCP server
-│   └── http-server.ts    # HTTP/SSE MCP server
+│   ├── index.ts          # Stdio MCP server (recommended)
+│   └── http-server.ts    # HTTP/SSE MCP server (alternative)
 ├── dist/                 # Compiled JavaScript
 ├── Dockerfile
 ├── docker-compose.yml
@@ -240,20 +303,46 @@ MCP-scopus/
 └── README.md
 ```
 
-## Contributing
+---
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+## ❓ Troubleshooting
 
-## License
+### Connection Timeout Errors
+If you see timeout errors with HTTP/SSE, **switch to Option A (Direct Node.js)** - it's more stable.
+
+### API Key Issues
+```bash
+# Test your API key
+curl -H "X-ELS-APIKey: your_key" "https://api.elsevier.com/content/search/scopus?query=test"
+```
+
+### Container Won't Start
+```bash
+# Check logs
+docker logs mcp-scopus
+
+# Rebuild
+docker stop mcp-scopus && docker rm mcp-scopus
+docker build -t mcp-scopus . --no-cache
+docker run -d --name mcp-scopus -p 5566:5566 -e SCOPUS_API_KEY=your_key mcp-scopus
+```
+
+---
+
+## 📜 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Acknowledgments
+---
+
+## 🙏 Acknowledgments
 
 - [Model Context Protocol](https://modelcontextprotocol.io/) by Anthropic
 - [Scopus API](https://dev.elsevier.com/) by Elsevier
 
-## Disclaimer
+---
+
+## ⚠️ Disclaimer
 
 This project is not affiliated with, endorsed by, or sponsored by Elsevier or Scopus. Scopus® is a registered trademark of Elsevier B.V. Use of the Scopus API is subject to Elsevier's terms of service.
 
