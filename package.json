@@ -1,7 +1,7 @@
 {
   "name": "mcp-scopus",
-  "version": "1.0.0",
-  "description": "MCP server for searching academic papers on Scopus",
+  "version": "2.0.0",
+  "description": "MCP server for searching academic papers on Scopus - preventing AI citation hallucination",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
@@ -13,6 +13,8 @@
     "start:http": "node dist/http-server.js",
     "dev": "ts-node src/index.ts",
     "dev:http": "ts-node src/http-server.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "docker:build": "docker build -t mcp-scopus .",
     "docker:run": "docker run -p 5566:5566 --env-file .env mcp-scopus"
   },
@@ -39,7 +41,8 @@
     "@types/node": "^20.10.0",
     "eventsource": "^4.1.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.0"
+    "typescript": "^5.3.0",
+    "vitest": "^3.1.0"
   },
   "engines": {
     "node": ">=18.0.0"
